@@ -26,7 +26,7 @@ class Route
 
     public function isLocalized(): bool
     {
-        return $this->isLocalized() !== null;
+        return $this->getRouteLocale() !== null;
     }
 
     public function getRouteLocale(): ?string
