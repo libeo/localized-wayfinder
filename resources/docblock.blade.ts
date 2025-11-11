@@ -6,5 +6,11 @@
 
 @endif
 @endforeach
+@if (isset($uris))
+@foreach ($uris as $locale => $uri)
+ * @route {!! $uri !!} ({!! $locale !!})
+@endforeach
+@else
  * @route {!! $uri !!}
+@endif
  */

@@ -3,6 +3,7 @@
 namespace Laravel\Wayfinder;
 
 use Closure;
+use CodeZero\LocalizedRoutes\Facades\LocaleConfig;
 use Illuminate\Contracts\Routing\UrlRoutable;
 use Illuminate\Routing\Route as BaseRoute;
 use Illuminate\Routing\RouteAction;
@@ -21,6 +22,18 @@ class Route
         private ?string $forcedRoot
     ) {
         //
+    }
+
+    public function isLocalized(): bool
+    {
+        return $this->isLocalized() !== null;
+    }
+
+    public function getRouteLocale(): ?string
+    {
+        $routeAction = LocaleConfig::getRouteAction();
+
+        return $this->base->getAction($routeAction);
     }
 
     public function hasController(): bool
@@ -75,12 +88,12 @@ class Route
 
         $signatureParams = collect($this->base->signatureParameters(UrlRoutable::class));
 
-        return collect($this->base->parameterNames())->map(fn ($name) => new Parameter(
+        return collect($this->base->parameterNames())->map(fn($name) => new Parameter(
             $name,
             $optionalParameters->has($name) || $this->paramDefaults->has($name),
             $this->base->bindingFieldFor($name),
             $this->paramDefaults->get($name),
-            $signatureParams->first(fn ($p) => $p->getName() === $name),
+            $signatureParams->first(fn($p) => $p->getName() === $name),
         ));
     }
 
@@ -91,13 +104,13 @@ class Route
 
     public function uri(): string
     {
-        $defaultParams = $this->paramDefaults->mapWithKeys(fn ($value, $key) => ["{{$key}}" => "{{$key}?}"]);
+        $defaultParams = $this->paramDefaults->mapWithKeys(fn($value, $key) => ["{{$key}}" => "{{$key}?}"]);
 
         $scheme = $this->scheme() ?? '//';
 
         $uri = str($this->base->uri)
             ->start('/')
-            ->when($this->domain() !== null, fn ($uri) => $uri->prepend("{$scheme}{$this->domain()}"))
+            ->when($this->domain() !== null, fn($uri) => $uri->prepend("{$scheme}{$this->domain()}"))
             ->replace($defaultParams->keys()->toArray(), $defaultParams->values()->toArray())
             ->toString();
 
@@ -126,12 +139,12 @@ class Route
     {
         $name = $this->base->getName();
 
-        if (! $name || Str::endsWith($name, '.') || Str::startsWith($name, 'generated::')) {
+        if (!$name || Str::endsWith($name, '.') || Str::startsWith($name, 'generated::')) {
             return null;
         }
 
         if (str_contains($name, '::')) {
-            return 'namespaced.'.str_replace('::', '.', $name);
+            return 'namespaced.' . str_replace('::', '.', $name);
         }
 
         return $name;
@@ -151,7 +164,7 @@ class Route
             return $path;
         }
 
-        if (! class_exists($controller)) {
+        if (!class_exists($controller)) {
             return '[unknown]';
         }
 
@@ -166,7 +179,7 @@ class Route
             return (new ReflectionClosure($this->closure()))->getStartLine();
         }
 
-        if (! class_exists($controller)) {
+        if (!class_exists($controller)) {
             return 0;
         }
 
